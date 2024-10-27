@@ -16,7 +16,7 @@ default_args = {
 
 # Define the DAG
 with DAG(
-    'fetch_and_store_danish_energy_data_v3',
+    'fetch_and_store_danish_energy_data_v4',
     default_args=default_args,
     description='Fetch data from Danish Energy API and store it in PostgreSQL',
     schedule_interval=timedelta(days=1),
@@ -25,7 +25,7 @@ with DAG(
 ) as dag:
 
     def fetch_data_from_api():
-        API_URL = "https://api.energidataservice.dk/dataset/ElectricitySuppliersPerGridarea?offset=0&start=2024-10-01T00:00&end=2024-10-27T00:00&sort=Month%20DESC"
+        API_URL = "https://api.energidataservice.dk/dataset/ElectricitySuppliersPerGridarea?offset=0&sort=Month%20DESC"
         response = requests.get(API_URL)
         response.raise_for_status()  # Raise an error if the request fails
         data = response.json().get('records', [])
