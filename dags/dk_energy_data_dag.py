@@ -16,7 +16,7 @@ default_args = {
 
 # Define the DAG
 with DAG(
-    'fetch_and_store_danish_energy_data',
+    'fetch_and_store_danish_energy_data_v3',
     default_args=default_args,
     description='Fetch data from Danish Energy API and store it in PostgreSQL',
     schedule_interval=timedelta(days=1),
@@ -25,7 +25,7 @@ with DAG(
 ) as dag:
 
     def fetch_data_from_api():
-        API_URL = "https://api.energidataservice.dk/dataset/ElectricitySuppliersPerGridarea?offset=0&sort=Month%20DESC"
+        API_URL = "https://api.energidataservice.dk/dataset/ElectricitySuppliersPerGridarea?offset=0&start=2024-10-01T00:00&end=2024-10-27T00:00&sort=Month%20DESC"
         response = requests.get(API_URL)
         response.raise_for_status()  # Raise an error if the request fails
         data = response.json().get('records', [])
@@ -37,18 +37,14 @@ with DAG(
             raise ValueError("No data was fetched from the API.")
 
         # Initialize PostgreSQL hook
-        postgres_hook = PostgresHook(postgres_conn_id='airflow_db')  # Replace with your connection ID
+        postgres_hook = PostgresHook(postgres_conn_id='Danish_connection')  # Replace with your connection ID
 
         # Create the table if it does not exist
         create_table_query = """
-        CREATE TABLE IF NOT EXISTS electricity_suppliers (
+        CREATE TABLE IF NOT EXISTS Danish (
             Month DATE,
-            GridArea VARCHAR(50),
-            SupplyId VARCHAR(50),
-            SupplyName VARCHAR(255),
-            SupplierId VARCHAR(50),
-            SupplierName VARCHAR(255),
-            SupplierType VARCHAR(50)
+            GridCompany VARCHAR(50),
+            ActiveSupplierPerGridArea VARCHAR(50)
         );
         """
         postgres_hook.run(create_table_query)
@@ -56,15 +52,11 @@ with DAG(
         # Insert data into the table
         for record in data:
             insert_query = f"""
-            INSERT INTO electricity_suppliers (Month, GridArea, SupplyId, SupplyName, SupplierId, SupplierName, SupplierType)
+            INSERT INTO Danish (Month, GridCompany, ActiveSupplierPerGridArea)
             VALUES (
                 '{record['Month']}',
-                '{record['GridArea']}',
-                '{record['SupplyId']}',
-                '{record['SupplyName']}',
-                '{record['SupplierId']}',
-                '{record['SupplierName']}',
-                '{record['SupplierType']}'
+                '{record['GridCompany']}',
+                '{record['ActiveSupplierPerGridArea']}'
             ) ON CONFLICT DO NOTHING;
             """
             postgres_hook.run(insert_query)
