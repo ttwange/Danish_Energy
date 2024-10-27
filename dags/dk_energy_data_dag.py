@@ -1,5 +1,6 @@
 from airflow import DAG
 from airflow.operators.python import PythonOperator
+from airflow.providers.postgres.hooks.postgres import PostgresHook
 import requests
 from datetime import datetime, timedelta
 
@@ -15,10 +16,10 @@ default_args = {
 
 # Define the DAG
 with DAG(
-    'fetch_danish_energy_data',
+    'fetch_and_store_danish_energy_data',
     default_args=default_args,
-    description='Fetch data from Danish Energy API and print to terminal',
-    schedule_interval=timedelta(days=1),  # Change as desired
+    description='Fetch data from Danish Energy API and store it in PostgreSQL',
+    schedule_interval=timedelta(days=1),
     start_date=datetime(2023, 1, 1),
     catchup=False,
 ) as dag:
@@ -28,10 +29,56 @@ with DAG(
         response = requests.get(API_URL)
         response.raise_for_status()  # Raise an error if the request fails
         data = response.json().get('records', [])
-        print("Fetched Data:", data)  # Print to Airflow logs for verification
+        return data  # Return data to pass it to the next task
 
-    # Define the task
+    def store_data_in_postgres(ti):
+        data = ti.xcom_pull(task_ids='fetch_data')  # Pull data from the previous task
+        if not data:
+            raise ValueError("No data was fetched from the API.")
+
+        # Initialize PostgreSQL hook
+        postgres_hook = PostgresHook(postgres_conn_id='airflow_db')  # Replace with your connection ID
+
+        # Create the table if it does not exist
+        create_table_query = """
+        CREATE TABLE IF NOT EXISTS electricity_suppliers (
+            Month DATE,
+            GridArea VARCHAR(50),
+            SupplyId VARCHAR(50),
+            SupplyName VARCHAR(255),
+            SupplierId VARCHAR(50),
+            SupplierName VARCHAR(255),
+            SupplierType VARCHAR(50)
+        );
+        """
+        postgres_hook.run(create_table_query)
+
+        # Insert data into the table
+        for record in data:
+            insert_query = f"""
+            INSERT INTO electricity_suppliers (Month, GridArea, SupplyId, SupplyName, SupplierId, SupplierName, SupplierType)
+            VALUES (
+                '{record['Month']}',
+                '{record['GridArea']}',
+                '{record['SupplyId']}',
+                '{record['SupplyName']}',
+                '{record['SupplierId']}',
+                '{record['SupplierName']}',
+                '{record['SupplierType']}'
+            ) ON CONFLICT DO NOTHING;
+            """
+            postgres_hook.run(insert_query)
+
+    # Define tasks
     fetch_data = PythonOperator(
         task_id='fetch_data',
         python_callable=fetch_data_from_api
     )
+
+    store_data = PythonOperator(
+        task_id='store_data',
+        python_callable=store_data_in_postgres
+    )
+
+    # Set task dependencies
+    fetch_data >> store_data
