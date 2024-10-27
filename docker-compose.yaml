@@ -190,17 +190,15 @@ services:
     entrypoint: /bin/bash
     # yamllint disable rule:line-length
     command:
-      - -c
-      - |
-        if [[ -z "${AIRFLOW_UID}" ]]; then
-          echo
-          echo -e "\033[1;33mWARNING!!!: AIRFLOW_UID not set!\e[0m"
-          echo "If you are on Linux, you SHOULD follow the instructions below to set "
-          echo "AIRFLOW_UID environment variable, otherwise files will be owned by root."
-          echo "For other operating systems you can get rid of the warning with manually created .env file:"
-          echo "    See: https://airflow.apache.org/docs/apache-airflow/stable/howto/docker-compose/index.html#setting-the-right-airflow-user"
-          echo
-        fi
+    - -c
+    - |
+      if [[ ! -f "/sources/initialized.lock" ]]; then
+        touch /sources/initialized.lock
+        airflow db init
+        airflow users create --username airflow --password airflow --role Admin --email admin@example.com
+      else
+        echo "Database already initialized"
+      fi
         one_meg=1048576
         mem_available=$$(($$(getconf _PHYS_PAGES) * $$(getconf PAGE_SIZE) / one_meg))
         cpus_available=$$(grep -cE 'cpu[0-9]+' /proc/stat)
