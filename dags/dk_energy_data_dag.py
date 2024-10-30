@@ -37,7 +37,7 @@ with DAG(
             raise ValueError("No data was fetched from the API.")
 
         # Initialize PostgreSQL hook
-        postgres_hook = PostgresHook(postgres_conn_id='Danish_connection')  # Replace with your connection ID
+        postgres_hook = PostgresHook(postgres_conn_id='Danish_Airflow')  # Replace with your connection ID
 
         # Create the table if it does not exist
         create_table_query = """

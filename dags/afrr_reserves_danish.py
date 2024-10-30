@@ -49,7 +49,7 @@ with DAG(
             raise ValueError("No transformed data was found.")
 
         # Initialize PostgreSQL hook
-        postgres_hook = PostgresHook(postgres_conn_id='Danish_connection')  # Replace with your connection ID
+        postgres_hook = PostgresHook(postgres_conn_id='Danish_Airflow')  # Replace with your connection ID
 
         # Define the table structure
         create_table_query = """
