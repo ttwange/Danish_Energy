@@ -24,7 +24,7 @@ with DAG(
     # Refresh daily price trends view
     refresh_daily_price_trends = PostgresOperator(
         task_id="refresh_daily_price_trends",
-        postgres_conn_id="Danish_connection",
+        postgres_conn_id="Danish_Airflow",
         sql="""
         CREATE OR REPLACE VIEW daily_price_trends AS
         SELECT 
