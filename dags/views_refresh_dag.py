@@ -44,7 +44,7 @@ with DAG(
     # Refresh daily reserve demand view
     refresh_daily_reserve_demand = PostgresOperator(
         task_id="refresh_daily_reserve_demand",
-        postgres_conn_id="Danish_connection",
+        postgres_conn_id="Danish_Airflow",
         sql="""
         CREATE OR REPLACE VIEW daily_reserve_demand AS
         SELECT 
