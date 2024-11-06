@@ -22,7 +22,10 @@ with DAG(
 ) as dag:
 
     def fetch_data_from_api():
-        API_URL = "https://api.energidataservice.dk/dataset/AfrrReservesNordic?offset=0&start=2024-07-26T00:00&end=2024-10-27T00:00&sort=HourDK%20DESC"
+        today_date = datetime.now().strftime("%Y-%m-%dT00:00:00")
+        
+        API_URL = "https://api.energidataservice.dk/dataset/AfrrReservesNordic?offset=0&start=2024-07-26T00:00&end{today_date}&sort=HourDK%20DESC"
+        #API_URL = "https://api.energidataservice.dk/dataset/AfrrReservesNordic?offset=0&start=2024-07-26T00:00&end=2024-10-27T00:00&sort=HourDK%20DESC"
         response = requests.get(API_URL)
         response.raise_for_status()  # Raise an error if the request fails
         data = response.json().get('records', [])
