@@ -62,7 +62,7 @@ with DAG(
     # Refresh market efficiency metrics view
     refresh_market_efficiency = PostgresOperator(
         task_id="refresh_market_efficiency",
-        postgres_conn_id="Danish_connection",
+        postgres_conn_id="Danish_Airflow",
         sql="""
         CREATE OR REPLACE VIEW market_efficiency AS
         SELECT 
@@ -83,7 +83,7 @@ with DAG(
     # Refresh regional demand comparison view
     refresh_regional_demand_comparison = PostgresOperator(
         task_id="refresh_regional_demand_comparison",
-        postgres_conn_id="Danish_connection",
+        postgres_conn_id="Danish_Airflow",
         sql="""
         CREATE OR REPLACE VIEW regional_demand_comparison AS
         SELECT 
