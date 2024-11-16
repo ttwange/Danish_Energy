@@ -73,11 +73,11 @@ services:
       - "3000:3000"
     environment:
       MB_DB_TYPE: postgres
-      MB_DB_DBNAME: your_database  # Name of your PostgreSQL database
-      MB_DB_PORT: 5432            # PostgreSQL port
-      MB_DB_USER: your_username   # PostgreSQL username
-      MB_DB_PASS: your_password   # PostgreSQL password
-      MB_DB_HOST: postgres        # The hostname of the PostgreSQL service defined above
+      MB_DB_DBNAME: your_database  
+      MB_DB_PORT: 5432            
+      MB_DB_USER: airflow   
+      MB_DB_PASS: airflow   
+      MB_DB_HOST: postgres        
       MB_DISABLE_LOGIN_FURTHER: "true"
     depends_on:
       - postgres
