@@ -24,7 +24,7 @@
 # The following variables are supported:
 #
 # AIRFLOW_IMAGE_NAME           - Docker image name used to run Airflow.
-#                                Default: apache/airflow:2.9.2
+#                                Default: apache/airflow:2.10.3
 # AIRFLOW_UID                  - User ID in Airflow containers
 #                                Default: 50000
 # AIRFLOW_PROJ_DIR             - Base path to which all the files will be volumed.
@@ -87,7 +87,7 @@ x-airflow-common:
 
 services:
   postgres:
-    image: debezium/postgres:13
+    image: postgres:13
     environment:
       POSTGRES_USER: airflow
       POSTGRES_PASSWORD: airflow
@@ -100,35 +100,7 @@ services:
       retries: 5
       start_period: 5s
     restart: always
-    ports:
-      - "5432:5432"
 
-  pgadmin:
-    image: dpage/pgadmin4:7.6
-    restart: always
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@admin.com
-      PGADMIN_DEFAULT_PASSWORD: root
-    ports:
-      - "5050:80"
-  
-  metabase:
-    image: metabase/metabase:v0.51.3.5
-    container_name: metabase
-    ports:
-      - "3000:3000"
-    environment:
-      MB_DB_TYPE: postgres
-      MB_DB_DBNAME: airflow  
-      MB_DB_PORT: 5432            
-      MB_DB_USER: airflow   
-      MB_DB_PASS: airflow   
-      MB_DB_HOST: postgres        
-      MB_DISABLE_LOGIN_FURTHER: "true"
-    depends_on:
-      - postgres
-    restart: always
-    
   redis:
     # Redis is limited to 7.2-bookworm due to licencing change
     # https://redis.io/blog/redis-adopts-dual-source-available-licensing/
@@ -314,5 +286,3 @@ services:
 
 volumes:
   postgres-db-volume:
-
-  
